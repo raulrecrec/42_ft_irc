@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/06 15:30:17 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/06 16:06:20 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Server
 		std::string	_password;
 
 		void	initSocket();
+		void	closeSocket();
 
 		/*
 		 * Every existing channel, by name. Lives in the server so commands
