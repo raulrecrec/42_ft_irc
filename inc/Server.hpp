@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/05 20:17:28 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/06 15:30:17 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,12 @@ class Client;
 class Server
 {
 	private:
+		int			_listenFd;
+		int			_port;
+		std::string	_password;
+
+		void	initSocket();
+
 		/*
 		 * Every existing channel, by name. Lives in the server so commands
 		 * can reach it, but only the channel side creates, changes and
@@ -36,13 +42,15 @@ class Server
 		std::map<std::string, Channel*>	channels;
 
 	public:
+		Server(int port, const std::string &password);
+		~Server();
+
 		/*
 		 * Finds the connected client using that nickname, ignoring case
 		 * the way IRC does. NULL when nobody has it.
 		 * Used to deliver private messages, kick or invite someone...
 		 */
 		Client*	findClient(const std::string &nick);
-
 		Channel* findChannel(const std::string &name);
 
 		void sendToClient(const Client &client, const std::string &msg);
