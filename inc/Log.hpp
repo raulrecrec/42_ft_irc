@@ -15,10 +15,10 @@
 #define TAG_WARN	"\033[0;33mWARNING" COL_GRAY ": "
 #define TAG_ERR		"\033[0;31mERROR" COL_GRAY ": "
 
-struct LogInfo	{ const char *text; };
-struct LogOk	{ const char *text; };
-struct LogWarn	{ const char *text; };
-struct LogErr	{ const char *text; };
+struct LogInfo	{ const std::string text; };
+struct LogOk	{ const std::string text; };
+struct LogWarn	{ const std::string text; };
+struct LogErr	{ const std::string text; };
 
 /*
  - Messages
@@ -83,7 +83,7 @@ class Log {
 
 		Log();
 
-		static void	print(std::ostream &out, const char *tag, const char *color, const char *text) {
+		static void	print(std::ostream &out, const char *tag, const char *color, const std::string text) {
 			out << tag << color << text << COL_RESET << std::endl;
 		}
 
