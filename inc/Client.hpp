@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:16 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/10 15:00:09 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/10 19:47:29 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ class Client
 		bool				isAuthorized() const;
 		bool				isRegistered() const;
 
-		void				appendInput(const std::string &data);
+		void				appendInput(const char *data, size_t len);
 		void				appendOutput(const std::string &data);
 };
 
