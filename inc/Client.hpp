@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:16 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/10 19:47:29 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/11 00:20:07 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,13 @@
 #define CLIENT_HPP
 
 #include <string>
+
+enum LineStatus
+{
+	LINE_READY,
+	LINE_INCOMPLETE,
+	LINE_TOO_LONG,
+};
 
 /* One user connected to the server. */
 class Client
@@ -59,6 +66,7 @@ class Client
 
 		void				appendInput(const char *data, size_t len);
 		void				appendOutput(const std::string &data);
+		LineStatus			extractLine(std::string &line);
 };
 
 #endif

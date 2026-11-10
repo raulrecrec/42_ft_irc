@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/10 21:53:15 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/11 00:41:35 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,25 +236,44 @@ void	Server::handleClientRead(int clientFd)
 {
 	char		buffer[4096];
 	ssize_t		bytesReceived;
+	std::string	line;
+	LineStatus	status;
 
 	bytesReceived = recv(clientFd, buffer, sizeof(buffer), 0);
 
-	if (bytesReceived > 0)
+	if (bytesReceived == 0)
+		removeClient(clientFd);
+	else if (bytesReceived == -1)
 	{
-		_clients[clientFd]->appendInput(buffer, bytesReceived);
-
+		if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)
+			removeClient(clientFd);
+	}
+	else if (bytesReceived > 0)
+	{
 		if (DEBUG)
 		{
 			std::cout << "[FD " << clientFd << "] Received " << bytesReceived << " bytes: ";
 			std::cout.write(buffer, bytesReceived);
 			std::cout << std::endl;
 		}
-	}
-	else if (bytesReceived == 0)
-		removeClient(clientFd);
-	else if (bytesReceived == -1)
-	{
-		if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)
-			removeClient(clientFd);
+		_clients[clientFd]->appendInput(buffer, bytesReceived);
+
+		status = LINE_READY;
+		while (status == LINE_READY)
+		{
+			status = _clients[clientFd]->extractLine(line);
+			switch (status)
+			{
+			case LINE_READY:
+				if (DEBUG)
+					std::cout << "[FD " << clientFd << "] IRC command: " << line << std::endl;
+				break ;
+			case LINE_INCOMPLETE:
+				return ;
+			case LINE_TOO_LONG:
+				removeClient(clientFd);
+				return ;
+			}
+		}
 	}
 }
