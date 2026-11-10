@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:16 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/05 20:17:19 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/10 15:00:09 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,18 @@
 class Client
 {
 	private:
-		int			fd;
-		std::string	nickname;
-		std::string	username;
+		int			_fd;
+		std::string	_nickname;
+		std::string	_username;
+		std::string	_inputBuffer;
+		std::string	_outputBuffer;
 
 	public:
+		Client(int fd);
+		~Client();
+
+		int	getFd() const;
+
 		/*
 		 * The client's current nickname, empty until it has set one.
 		 * Used to find users and to address replies to them.

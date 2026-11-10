@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/06 17:31:45 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/10 17:25:05 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,14 @@ class Server
 		int			_port;
 		std::string	_password;
 
-		std::vector<struct pollfd> _pollFds;
+		std::vector<struct pollfd>	_pollFds;
+		std::map<int, Client*>		_clients;
 
 		void	initSocket();
 		void	closeSocket();
 
 		void	acceptClient();
+		void	removeClient(int clientFd);
 		void	handleClientRead(int clientFd);
 		/*
 		 * Every existing channel, by name. Lives in the server so commands

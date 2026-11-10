@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/06 17:36:43 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/10 17:17:24 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <cerrno>
+#include "Client.hpp"
 
 Server::Server(int port, const std::string &password)
 	: _listenFd(-1), _port(port), _password(password)
@@ -27,6 +28,10 @@ Server::Server(int port, const std::string &password)
 
 Server::~Server()
 {
+	while (!_clients.empty())
+	{
+		removeClient(_clients.begin()->first);
+	}
 	closeSocket();
 }
 
@@ -101,6 +106,7 @@ void	Server::run()
 
 		size_t	i;
 		size_t	count;
+		size_t	previousSize;
 
 		i = 0;
 		count = _pollFds.size();
@@ -111,7 +117,15 @@ void	Server::run()
 				if (_pollFds[i].fd == _listenFd)
 					acceptClient();
 				else
+				{
+					previousSize = _pollFds.size();
 					handleClientRead(_pollFds[i].fd);
+					if (_pollFds.size() < previousSize)
+					{
+						count--;
+						continue;
+					}
+				}
 			}
 			i++;
 		}
@@ -142,12 +156,50 @@ void	Server::acceptClient()
 	}
 
 	struct pollfd	pfd;
+	Client	*client = NULL;
 
 	pfd.fd = clientFd;
 	pfd.events = POLLIN;
 	pfd.revents = 0;
+	try
+	{
+		client = new Client(clientFd);
+		_clients[clientFd] = client;
+		_pollFds.push_back(pfd);
+	}
+	catch(const std::exception &)
+	{
+		_clients.erase(clientFd);
+		delete client;
+		close(clientFd);
+		return ;
+	}
+}
 
-	_pollFds.push_back(pfd);
+void	Server::removeClient(int clientFd)
+{
+	std::map<int, Client*>::iterator	itMap;
+
+	itMap = _clients.find(clientFd);
+	if (itMap != _clients.end())
+	{
+		delete itMap->second;
+		_clients.erase(itMap);
+	}
+
+	std::vector<struct pollfd>::iterator	itVector;
+
+	itVector = _pollFds.begin();
+	while (itVector != _pollFds.end())
+	{
+		if (itVector->fd == clientFd)
+		{
+			close(itVector->fd);
+			_pollFds.erase(itVector);
+			break;
+		}
+		itVector++;
+	}
 }
 
 void	Server::handleClientRead(int clientFd)
