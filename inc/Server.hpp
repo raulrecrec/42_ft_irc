@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/10 17:25:05 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/11 13:59:12 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class Server
 		void	acceptClient();
 		void	removeClient(int clientFd);
 		void	handleClientRead(int clientFd);
+		void	handleClientWrite(struct pollfd &pfd);
 		/*
 		 * Every existing channel, by name. Lives in the server so commands
 		 * can reach it, but only the channel side creates, changes and
@@ -62,10 +63,10 @@ class Server
 		 * the way IRC does. NULL when nobody has it.
 		 * Used to deliver private messages, kick or invite someone...
 		 */
-		Client*	findClient(const std::string &nick);
-		Channel* findChannel(const std::string &name);
+		Client*		findClient(const std::string &nick);
+		Channel*	findChannel(const std::string &name);
 
-		void sendToClient(const Client &client, const std::string &msg);
+		void		sendToClient(int clientFd, const std::string &msg);
 };
 
 #endif

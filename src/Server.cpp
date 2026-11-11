@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/11 12:57:27 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/11 17:14:10 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,16 @@ void	Server::run()
 					count--;
 					continue ;
 				}
+				if (_pollFds[i].revents & POLLOUT)
+				{
+					previousSize = _pollFds.size();
+					handleClientWrite(_pollFds[i]);
+					if (_pollFds.size() < previousSize)
+					{
+						count--;
+						continue ;
+					}
+				}
 			}
 			i++;
 		}
@@ -183,6 +193,7 @@ void	Server::acceptClient()
 	pfd.fd = clientFd;
 	pfd.events = POLLIN;
 	pfd.revents = 0;
+
 	try
 	{
 		client = new Client(clientFd);
@@ -205,6 +216,7 @@ void	Server::removeClient(int clientFd)
 	Log::debug(CLIENT_DISCONNECTED) << clientFd;
 
 	std::map<int, Client*>::iterator	itMap;
+
 	itMap = _clients.find(clientFd);
 	if (itMap != _clients.end())
 	{
@@ -229,11 +241,13 @@ void	Server::removeClient(int clientFd)
 
 void	Server::handleClientRead(int clientFd)
 {
+	Client		*client;
 	char		buffer[4096];
 	ssize_t		bytesReceived;
 	std::string	line;
 	LineStatus	status;
 
+	client = _clients[clientFd];
 	bytesReceived = recv(clientFd, buffer, sizeof(buffer), 0);
 
 	if (bytesReceived == 0)
@@ -246,16 +260,18 @@ void	Server::handleClientRead(int clientFd)
 	else if (bytesReceived > 0)
 	{
 		Log::debug(DATA_RECEIVED) << clientFd << bytesReceived;
-		_clients[clientFd]->appendInput(buffer, bytesReceived);
+		client->appendInput(buffer, bytesReceived);
 
 		status = LINE_READY;
 		while (status == LINE_READY)
 		{
-			status = _clients[clientFd]->extractLine(line);
+			status = client->extractLine(line);
 			switch (status)
 			{
 			case LINE_READY:
 				Log::debug(COMMAND_RECEIVED) << clientFd << line;
+				if (line.compare(0, 5, "PING ") == 0)
+					sendToClient(clientFd, "PONG" + line.substr(4) + "\r\n");
 				break ;
 			case LINE_INCOMPLETE:
 				return ;
@@ -264,5 +280,60 @@ void	Server::handleClientRead(int clientFd)
 				return ;
 			}
 		}
+	}
+}
+
+void	Server::handleClientWrite(struct pollfd &pfd)
+{
+	Client	*client;
+	int		clientFd;
+	ssize_t	bytesSent;
+
+	clientFd = pfd.fd;
+	client = _clients[clientFd];
+	if (client->getOutputBuffer().empty())
+	{
+		pfd.events &= ~POLLOUT;
+		return ;
+	}
+
+	bytesSent = send(clientFd, client->getOutputBuffer().c_str(), client->getOutputBuffer().size(), MSG_NOSIGNAL);
+
+	if (bytesSent == 0)
+	{
+		removeClient(clientFd);
+		return ;
+	}
+	else if (bytesSent == -1)
+	{
+		if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)
+			removeClient(clientFd);
+		return ;
+	}
+	else if (bytesSent > 0)
+	{
+		client->consumeOutput(bytesSent);
+		if (client->getOutputBuffer().empty())
+			pfd.events &= ~POLLOUT;
+	}
+}
+
+void	Server::sendToClient(int clientFd, const std::string &msg)
+{
+	if (msg.empty())
+		return ;
+
+	std::vector<struct pollfd>::iterator	itClient;
+
+	itClient = _pollFds.begin();
+	while (itClient != _pollFds.end())
+	{
+		if (itClient->fd == clientFd)
+		{
+			_clients[clientFd]->appendOutput(msg.c_str(), msg.size());
+			itClient->events |= POLLOUT;
+			break ;
+		}
+		itClient++;
 	}
 }

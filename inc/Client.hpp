@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:16 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/11 00:20:07 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/11 13:20:22 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,8 @@ class Client
 
 		const std::string&	getUsername() const;
 
+		const std::string	&getOutputBuffer() const;
+
 		/*
 		 * Who this client is, as other users see it ("nick!user@host").
 		 * Goes at the start of every message this client causes, so that
@@ -65,8 +67,9 @@ class Client
 		bool				isRegistered() const;
 
 		void				appendInput(const char *data, size_t len);
-		void				appendOutput(const std::string &data);
+		void				appendOutput(const char *data, size_t len);
 		LineStatus			extractLine(std::string &line);
+		void				consumeOutput(size_t bytesSent);
 };
 
 #endif
