@@ -3,19 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: daniema3 <daniema3@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/11/10 17:24:03 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/10 21:06:59 by rexposit         ###   ########.fr       */
+/*   Created: 2026/11/09 03:48:27 by daniema3          #+#    #+#             */
+/*   Updated: 2026/11/09 05:24:14 by daniema3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Log.hpp"
 #include "Server.hpp"
 #include <iostream>
 #include <exception>
 
 int main()
 {
+	Log::info(STARTING);
 	try
 	{
 		Server server(6667, "password123");
