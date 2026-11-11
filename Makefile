@@ -6,7 +6,7 @@
 #    By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/11/05 18:38:14 by rexposit          #+#    #+#              #
-#    Updated: 2026/11/06 16:22:39 by rexposit         ###   ########.fr        #
+#    Updated: 2026/11/10 17:24:23 by rexposit         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,8 @@ CXXFLAGS =	-Wall -Wextra -Werror \
 # > ~ Sources
 
 SRCS =	main.cpp \
-		Server.cpp
+		Server.cpp \
+		Client.cpp
 
 # > ~ .cpp to .o conversion
 

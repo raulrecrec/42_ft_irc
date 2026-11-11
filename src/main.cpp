@@ -11,9 +11,25 @@
 /* ************************************************************************** */
 
 #include "Log.hpp"
+#include "Server.hpp"
+#include <iostream>
+#include <exception>
 
-int	main(void)
+int main()
 {
 	Log::info(STARTING);
+	try
+	{
+		Server server(6667, "password123");
+
+		std::cout << "Server listening on port 6667" << std::endl;
+
+		server.run();
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << e.what() << std::endl;
+		return (1);
+	}
 	return (0);
 }

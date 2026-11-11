@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/06 16:06:20 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/10 17:25:05 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 #include <map>
 #include <string>
+#include <vector>
+#include <poll.h>
 
 class Channel;
 class Client;
@@ -32,9 +34,15 @@ class Server
 		int			_port;
 		std::string	_password;
 
+		std::vector<struct pollfd>	_pollFds;
+		std::map<int, Client*>		_clients;
+
 		void	initSocket();
 		void	closeSocket();
 
+		void	acceptClient();
+		void	removeClient(int clientFd);
+		void	handleClientRead(int clientFd);
 		/*
 		 * Every existing channel, by name. Lives in the server so commands
 		 * can reach it, but only the channel side creates, changes and
@@ -45,6 +53,9 @@ class Server
 	public:
 		Server(int port, const std::string &password);
 		~Server();
+
+		void	run();
+		
 
 		/*
 		 * Finds the connected client using that nickname, ignoring case

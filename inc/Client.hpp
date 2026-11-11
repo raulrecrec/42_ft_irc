@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:16 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/05 20:17:19 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/11 00:20:07 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,29 @@
 
 #include <string>
 
+enum LineStatus
+{
+	LINE_READY,
+	LINE_INCOMPLETE,
+	LINE_TOO_LONG,
+};
+
 /* One user connected to the server. */
 class Client
 {
 	private:
-		int			fd;
-		std::string	nickname;
-		std::string	username;
+		int			_fd;
+		std::string	_nickname;
+		std::string	_username;
+		std::string	_inputBuffer;
+		std::string	_outputBuffer;
 
 	public:
+		Client(int fd);
+		~Client();
+
+		int	getFd() const;
+
 		/*
 		 * The client's current nickname, empty until it has set one.
 		 * Used to find users and to address replies to them.
@@ -50,8 +64,9 @@ class Client
 		bool				isAuthorized() const;
 		bool				isRegistered() const;
 
-		void				appendInput(const std::string &data);
+		void				appendInput(const char *data, size_t len);
 		void				appendOutput(const std::string &data);
+		LineStatus			extractLine(std::string &line);
 };
 
 #endif
