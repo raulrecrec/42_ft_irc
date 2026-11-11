@@ -39,6 +39,13 @@ const LogInfo	STARTING = {"Starting IRC server"};
 const LogOk		SERVER_LISTENING = {"Server listening on port <white>{0}"};
 
 const LogErr	SERVER_STOPPED = {"Server stopped: <white>{0}"};
+const LogErr	SERVER_SOCKET_CREATE_FAILED = {"Failed to create server socket"};
+const LogErr	SERVER_SOCKET_NONBLOCK_FAILED = {"Failed to set server socket to non-blocking mode"};
+const LogErr	SERVER_SOCKET_BIND_FAILED = {"Failed to bind server socket"};
+const LogErr	SERVER_SOCKET_LISTEN_FAILED = {"Failed to listen on server socket"};
+const LogErr	SERVER_POLL_FAILED = {"Failed to poll server sockets"};
+const LogErr	LISTEN_SOCKET_POLL_ERROR = {"Listening socket error detected by poll"};
+const LogErr	CLIENT_ACCEPT_FAILED = {"Failed to accept client connection"};
 
 /*
  * One log line being built. It collects the arguments given with << and

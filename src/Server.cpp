@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/11 00:41:35 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/11 12:57:27 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	Server::initSocket()
 	_listenFd = socket(AF_INET, SOCK_STREAM, 0);
 
 	if (_listenFd == -1)
-		throw std::runtime_error("Failed to create server socket");
+		throw std::runtime_error(SERVER_SOCKET_CREATE_FAILED.text);
 
 	struct sockaddr_in	addr;
 
@@ -58,7 +58,7 @@ void	Server::initSocket()
 	if (result == -1)
 	{
 		closeSocket();
-		throw std::runtime_error("Failed to set server socket to non-blocking mode");
+		throw std::runtime_error(SERVER_SOCKET_NONBLOCK_FAILED.text);
 	}
 
 	result = bind(_listenFd, reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr));
@@ -66,7 +66,7 @@ void	Server::initSocket()
 	if (result == -1)
 	{
 		closeSocket();
-		throw std::runtime_error("Failed to bind server socket");
+		throw std::runtime_error(SERVER_SOCKET_BIND_FAILED.text);
 	}
 
 	result = listen(_listenFd, SOMAXCONN);
@@ -74,7 +74,7 @@ void	Server::initSocket()
 	if (result == -1)
 	{
 		closeSocket();
-		throw std::runtime_error("Failed to listen on server socket");
+		throw std::runtime_error(SERVER_SOCKET_LISTEN_FAILED.text);
 	}
 }
 
@@ -105,7 +105,7 @@ void	Server::run()
 		{
 			if (errno == EINTR)
 				continue ;
-			throw std::runtime_error("Failed to poll server sockets");
+			throw std::runtime_error(SERVER_POLL_FAILED.text);
 		}
 
 		size_t	i;
@@ -119,7 +119,7 @@ void	Server::run()
 			if (_pollFds[i].fd == _listenFd)
 			{
 				if (_pollFds[i].revents & (POLLERR | POLLNVAL | POLLHUP))
-					throw std::runtime_error("Listening socket error detected by poll");
+					throw std::runtime_error(LISTEN_SOCKET_POLL_ERROR.text);
 				if (_pollFds[i].revents & POLLIN)
 					acceptClient();
 			}
@@ -164,7 +164,7 @@ void	Server::acceptClient()
 		if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
 			return ;
 
-		throw std::runtime_error("Failed to accept client connection");
+		throw std::runtime_error(CLIENT_ACCEPT_FAILED.text);
 	}
 
 	int	result;
