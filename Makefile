@@ -28,7 +28,8 @@ CXXFLAGS =	-Wall -Wextra -Werror \
 
 SRCS =	main.cpp \
 		Server.cpp \
-		Client.cpp
+		Client.cpp \
+		Log.cpp
 
 # > ~ .cpp to .o conversion
 
@@ -89,4 +90,9 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+# > ~ Debug
+
+debug: CXXFLAGS += -DIRC_DEBUG -g3
+debug: re
+
+.PHONY: all clean fclean re debug

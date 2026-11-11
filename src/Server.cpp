@@ -19,10 +19,7 @@
 #include <fcntl.h>
 #include <cerrno>
 #include "Client.hpp"
-
-//DEBUG
-#define DEBUG 1
-#include <iostream>
+#include "Log.hpp"
 
 Server::Server(int port, const std::string &password)
 	: _listenFd(-1), _port(port), _password(password)
@@ -200,14 +197,12 @@ void	Server::acceptClient()
 		return ;
 	}
 
-	if (DEBUG)
-		std::cout << "Client connected: FD " << clientFd << std::endl;
+	Log::debug(CLIENT_CONNECTED) << clientFd;
 }
 
 void	Server::removeClient(int clientFd)
 {
-	if (DEBUG)
-		std::cout << "Client disconnected: FD " << clientFd << std::endl;
+	Log::debug(CLIENT_DISCONNECTED) << clientFd;
 
 	std::map<int, Client*>::iterator	itMap;
 	itMap = _clients.find(clientFd);
@@ -250,12 +245,7 @@ void	Server::handleClientRead(int clientFd)
 	}
 	else if (bytesReceived > 0)
 	{
-		if (DEBUG)
-		{
-			std::cout << "[FD " << clientFd << "] Received " << bytesReceived << " bytes: ";
-			std::cout.write(buffer, bytesReceived);
-			std::cout << std::endl;
-		}
+		Log::debug(DATA_RECEIVED) << clientFd << bytesReceived;
 		_clients[clientFd]->appendInput(buffer, bytesReceived);
 
 		status = LINE_READY;
@@ -265,8 +255,7 @@ void	Server::handleClientRead(int clientFd)
 			switch (status)
 			{
 			case LINE_READY:
-				if (DEBUG)
-					std::cout << "[FD " << clientFd << "] IRC command: " << line << std::endl;
+				Log::debug(COMMAND_RECEIVED) << clientFd << line;
 				break ;
 			case LINE_INCOMPLETE:
 				return ;
