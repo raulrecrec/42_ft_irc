@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:16 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/11 13:20:22 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/12 13:30:39 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class Client
 		std::string	_username;
 		std::string	_inputBuffer;
 		std::string	_outputBuffer;
+		bool		_authorized;
 
 	public:
 		Client(int fd);
@@ -62,6 +63,9 @@ class Client
 		 * forward.
 		 */
 		void				queue(const std::string &line);
+
+		void				setAuthorized(bool authorized);
+		void				setNick(const std::string &nickname);
 
 		bool				isAuthorized() const;
 		bool				isRegistered() const;

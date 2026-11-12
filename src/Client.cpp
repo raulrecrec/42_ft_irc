@@ -6,14 +6,14 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/09 19:37:01 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/11 13:17:14 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/12 13:38:31 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
 Client::Client(int fd)
-	: _fd(fd)
+	: _fd(fd), _authorized(false)
 {
 }
 
@@ -26,9 +26,29 @@ int	Client::getFd() const
 	return (_fd);
 }
 
+const std::string &Client::getNick() const
+{
+	return (_nickname);
+}
+
 const std::string	&Client::getOutputBuffer() const
 {
 	return (_outputBuffer);
+}
+
+void	Client::setAuthorized(bool authorized)
+{
+	_authorized = authorized;
+}
+
+void	Client::setNick(const std::string &nickname)
+{
+	_nickname = nickname;
+}
+
+bool	Client::isAuthorized() const
+{
+	return(_authorized);
 }
 
 void	Client::appendInput(const char *data, size_t len)

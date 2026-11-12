@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/11 17:14:10 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/12 19:38:07 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <cerrno>
 #include "Client.hpp"
 #include "Log.hpp"
+#include <cctype>
 
 Server::Server(int port, const std::string &password)
 	: _listenFd(-1), _port(port), _password(password)
@@ -33,6 +34,7 @@ Server::~Server()
 	{
 		removeClient(_clients.begin()->first);
 	}
+
 	closeSocket();
 }
 
@@ -269,10 +271,68 @@ void	Server::handleClientRead(int clientFd)
 			switch (status)
 			{
 			case LINE_READY:
-				Log::debug(COMMAND_RECEIVED) << clientFd << line;
+			{
+				if (line == "PASS" || line.compare(0, 5, "PASS ") == 0)
+					Log::debug(COMMAND_RECEIVED) << clientFd << "PASS [REDACTED]";
+				else
+					Log::debug(COMMAND_RECEIVED) << clientFd << line;
+
 				if (line.compare(0, 5, "PING ") == 0)
 					sendToClient(clientFd, "PONG" + line.substr(4) + "\r\n");
+
+				if (line.compare(0, 6, "RELAY ") == 0)
+				{
+					std::map<int, Client*>::iterator itMap;
+
+					itMap = _clients.begin();
+					while (itMap != _clients.end())
+					{
+						if (itMap->first != clientFd)
+							sendToClient(itMap->first, ":ircserv NOTICE * :[RELAY] " + line.substr(6) + "\r\n");
+						itMap++;
+					}
+				}
+
+				if (line == "PASS" || line.compare(0, 5, "PASS ") == 0)
+				{
+					if (line.size() <= 5)
+						sendToClient(clientFd, ERR_NEEDMOREPARAMS.text);
+					else if (_password == line.substr(5))
+					{
+						client->setAuthorized(true);
+						Log::debug(CLIENT_AUTHORIZED) << clientFd;
+					}
+					else
+						sendToClient(clientFd, ERR_PASSWDMISMATCH.text);
+				}
+
+				if (line == "NICK" || line.compare(0, 5, "NICK ") == 0)
+				{
+					if (line.size() <= 5)
+						sendToClient(clientFd, ERR_NONICKNAMEGIVEN.text);
+					else
+					{
+						std::string	nickname;
+						Client		*existingClient;
+
+						nickname = line.substr(5);
+						if (!isValidNick(nickname))
+							sendToClient(clientFd, ":ircserv 432 * " + nickname + " " + ERR_ERRONEUSNICKNAME.text);
+						else
+						{
+							existingClient = findClient(nickname);
+							if (existingClient == NULL || existingClient == client)
+							{
+								client->setNick(nickname);
+								Log::debug(CLIENT_NICK_SET) << clientFd << nickname;
+							}
+							else
+								sendToClient(clientFd, ":ircserv 433 * " + nickname + " " + ERR_NICKNAMEINUSE.text);
+						}
+					}
+				}
 				break ;
+			}
 			case LINE_INCOMPLETE:
 				return ;
 			case LINE_TOO_LONG:
@@ -318,22 +378,92 @@ void	Server::handleClientWrite(struct pollfd &pfd)
 	}
 }
 
+bool	Server::isValidNick(const std::string &nickname)
+{
+	if (nickname.empty() || nickname.size() > 9)
+		return (false);
+
+	const std::string	special = "[]\\^_`{|}";
+
+	if (!std::isalpha(static_cast<unsigned char>(nickname[0])) && special.find(nickname[0]) == std::string::npos)
+		return (false);
+
+	size_t	i;
+
+	i = 1;
+	while (i < nickname.size())
+	{
+		if (!std::isalnum(static_cast<unsigned char>(nickname[i])) && special.find(nickname[i]) == std::string::npos && nickname[i] != '-')
+			return (false);
+		i++;
+	}
+
+	return (true);
+}
+
+std::string	Server::normalizeNick(const std::string &nickname) const
+{
+	std::string	nicknameCpy;
+	size_t		i;
+
+	nicknameCpy = nickname;
+	i = 0;
+	while (i < nickname.size())
+	{
+		if (nicknameCpy[i] == '{')
+			nicknameCpy[i] = '[';
+		else if (nicknameCpy[i] == '}')
+			nicknameCpy[i] = ']';
+		else if (nicknameCpy[i] == '|')
+			nicknameCpy[i] = '\\';
+		else if (nicknameCpy[i] == '~')
+			nicknameCpy[i] = '^';
+		else
+			nicknameCpy[i] = std::tolower(static_cast<unsigned char>(nicknameCpy[i]));
+		i++;
+	}
+
+	return (nicknameCpy);
+}
+
+Client	*Server::findClient(const std::string &nick)
+{
+	std::map<int, Client*>::iterator	itMap;
+	std::string							nickNormalized;
+	std::string							clientNormalized;
+
+	if (nick.empty())
+		return (NULL);
+
+	nickNormalized = normalizeNick(nick);
+	itMap = _clients.begin();
+	while (itMap != _clients.end())
+	{
+		clientNormalized = normalizeNick(itMap->second->getNick());
+		if (clientNormalized == nickNormalized)
+			return (itMap->second);
+		itMap++;
+	}
+
+	return (NULL);
+}
+
 void	Server::sendToClient(int clientFd, const std::string &msg)
 {
+	std::vector<struct pollfd>::iterator	itVector;
+
 	if (msg.empty())
 		return ;
 
-	std::vector<struct pollfd>::iterator	itClient;
-
-	itClient = _pollFds.begin();
-	while (itClient != _pollFds.end())
+	itVector = _pollFds.begin();
+	while (itVector != _pollFds.end())
 	{
-		if (itClient->fd == clientFd)
+		if (itVector->fd == clientFd)
 		{
 			_clients[clientFd]->appendOutput(msg.c_str(), msg.size());
-			itClient->events |= POLLOUT;
+			itVector->events |= POLLOUT;
 			break ;
 		}
-		itClient++;
+		itVector++;
 	}
 }

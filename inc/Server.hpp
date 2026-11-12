@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/11 13:59:12 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/12 19:31:11 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,12 @@ class Server
 		void	initSocket();
 		void	closeSocket();
 
-		void	acceptClient();
-		void	removeClient(int clientFd);
-		void	handleClientRead(int clientFd);
-		void	handleClientWrite(struct pollfd &pfd);
+		void		acceptClient();
+		void		removeClient(int clientFd);
+		void		handleClientRead(int clientFd);
+		void		handleClientWrite(struct pollfd &pfd);
+		bool		isValidNick(const std::string &nickname);
+		std::string	normalizeNick(const std::string &nickname) const;
 		/*
 		 * Every existing channel, by name. Lives in the server so commands
 		 * can reach it, but only the channel side creates, changes and

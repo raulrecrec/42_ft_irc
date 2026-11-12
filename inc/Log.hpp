@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Log.hpp                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/11/05 21:17:28 by rexposit          #+#    #+#             */
+/*   Updated: 2026/11/12 19:54:47 by rexposit         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef LOG_HPP
 #define LOG_HPP
 
@@ -33,6 +45,8 @@ const LogDebug	CLIENT_CONNECTED = {"Client <white>{0} <msgcol>connected"};
 const LogDebug	CLIENT_DISCONNECTED = {"Client <white>{0} <msgcol>disconnected"};
 const LogDebug	DATA_RECEIVED = {"Received <white>{1} <msgcol>bytes from client <white>{0}"};
 const LogDebug	COMMAND_RECEIVED = {"Client <white>{0} <msgcol>sent: <white>{1}"};
+const LogDebug	CLIENT_AUTHORIZED = {"Client <white>{0} <msgcol>authorized successfully"};
+const LogDebug	CLIENT_NICK_SET = {"Client <white>{0} <msgcol>set nickname to <white>{1}"};
 
 const LogInfo	STARTING = {"Starting IRC server"};
 
@@ -46,6 +60,12 @@ const LogErr	SERVER_SOCKET_LISTEN_FAILED = {"Failed to listen on server socket"}
 const LogErr	SERVER_POLL_FAILED = {"Failed to poll server sockets"};
 const LogErr	LISTEN_SOCKET_POLL_ERROR = {"Listening socket error detected by poll"};
 const LogErr	CLIENT_ACCEPT_FAILED = {"Failed to accept client connection"};
+
+const LogErr	ERR_PASSWDMISMATCH = {":ircserv 464 * :Password incorrect\r\n"};
+const LogErr	ERR_NEEDMOREPARAMS = {":ircserv 461 * PASS :Not enough parameters\r\n"};
+const LogErr	ERR_NONICKNAMEGIVEN = {":ircserv 431 * :No nickname given\r\n"};
+const LogErr	ERR_NICKNAMEINUSE = {":Nickname is already in use\r\n"};
+const LogErr	ERR_ERRONEUSNICKNAME = {":Erroneous nickname\r\n"};
 
 /*
  * One log line being built. It collects the arguments given with << and
