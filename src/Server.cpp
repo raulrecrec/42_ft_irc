@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/12 19:38:07 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/13 19:40:29 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,6 +272,18 @@ void	Server::handleClientRead(int clientFd)
 			{
 			case LINE_READY:
 			{
+				if (line == "CAP LS" || line == "CAP LS 302")
+				{
+					client->setCapNegotiating(true);
+					sendToClient(clientFd, ":ircserv CAP * LS :\r\n");
+				}
+
+				if (line == "CAP END")
+				{
+					client->setCapNegotiating(false);
+					tryRegister(client);
+				}
+
 				if (line == "PASS" || line.compare(0, 5, "PASS ") == 0)
 					Log::debug(COMMAND_RECEIVED) << clientFd << "PASS [REDACTED]";
 				else
@@ -301,6 +313,7 @@ void	Server::handleClientRead(int clientFd)
 					{
 						client->setAuthorized(true);
 						Log::debug(CLIENT_AUTHORIZED) << clientFd;
+						tryRegister(client);
 					}
 					else
 						sendToClient(clientFd, ERR_PASSWDMISMATCH.text);
@@ -325,12 +338,52 @@ void	Server::handleClientRead(int clientFd)
 							{
 								client->setNick(nickname);
 								Log::debug(CLIENT_NICK_SET) << clientFd << nickname;
+								tryRegister(client);
 							}
 							else
 								sendToClient(clientFd, ":ircserv 433 * " + nickname + " " + ERR_NICKNAMEINUSE.text);
 						}
 					}
 				}
+
+				if (line == "USER" || line.compare(0, 5, "USER ") == 0)
+				{
+					if(line.size() <= 5)
+						sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS.text);
+					else
+					{
+						std::istringstream	stream(line.substr(5));
+						std::string			userName;
+						std::string			hostname;
+						std::string			servername;
+						std::string			realname;
+
+						stream >> userName;
+						stream >> hostname;
+						stream >> servername;
+						std::getline(stream, realname);
+
+						size_t	start;
+
+						start = realname.find_first_not_of(" \t");
+						if (start != std::string::npos)
+							realname.erase(0, start);
+						else
+							realname.clear();
+
+						if (!realname.empty() && realname[0] == ':')
+							realname.erase(0, 1);
+
+						if (userName.empty() || hostname.empty() || servername.empty() || realname.find_first_not_of(" \t") == std::string::npos)
+							sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS.text);
+						else
+						{
+							client->setUsername(userName);
+							tryRegister(client);
+						}
+					}
+				}
+
 				break ;
 			}
 			case LINE_INCOMPLETE:
@@ -424,6 +477,15 @@ std::string	Server::normalizeNick(const std::string &nickname) const
 	}
 
 	return (nicknameCpy);
+}
+
+void	Server::tryRegister(Client *client)
+{
+	if (!client->isRegistered() && client->isAuthorized() && !client->getNick().empty() && !client->getUsername().empty() && !client->isCapNegotiating())
+	{
+		client->setRegistered(true);
+		sendToClient(client->getFd(), ":ircserv 001 " + client->getNick() + " " + RPL_WELCOME.text);
+	}
 }
 
 Client	*Server::findClient(const std::string &nick)

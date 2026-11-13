@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:16 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/12 13:30:39 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/13 19:20:35 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ class Client
 		std::string	_inputBuffer;
 		std::string	_outputBuffer;
 		bool		_authorized;
+		bool		_registered;
+		bool		_capNegotiating;
 
 	public:
 		Client(int fd);
@@ -66,9 +68,13 @@ class Client
 
 		void				setAuthorized(bool authorized);
 		void				setNick(const std::string &nickname);
+		void				setUsername(const std::string &username);
+		void				setRegistered(bool registered);
+		void				setCapNegotiating(bool negotiating);
 
 		bool				isAuthorized() const;
 		bool				isRegistered() const;
+		bool				isCapNegotiating() const;
 
 		void				appendInput(const char *data, size_t len);
 		void				appendOutput(const char *data, size_t len);

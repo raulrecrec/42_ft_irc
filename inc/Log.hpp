@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 21:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/12 19:54:47 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/13 19:49:15 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ const LogDebug	CLIENT_NICK_SET = {"Client <white>{0} <msgcol>set nickname to <wh
 const LogInfo	STARTING = {"Starting IRC server"};
 
 const LogOk		SERVER_LISTENING = {"Server listening on port <white>{0}"};
+const LogOk		RPL_WELCOME = {":Welcome to the rexposit & daniema3 IRC Network!\r\n"};
 
 const LogErr	SERVER_STOPPED = {"Server stopped: <white>{0}"};
 const LogErr	SERVER_SOCKET_CREATE_FAILED = {"Failed to create server socket"};
@@ -66,6 +67,8 @@ const LogErr	ERR_NEEDMOREPARAMS = {":ircserv 461 * PASS :Not enough parameters\r
 const LogErr	ERR_NONICKNAMEGIVEN = {":ircserv 431 * :No nickname given\r\n"};
 const LogErr	ERR_NICKNAMEINUSE = {":Nickname is already in use\r\n"};
 const LogErr	ERR_ERRONEUSNICKNAME = {":Erroneous nickname\r\n"};
+const LogErr	ERR_USER_NEEDMOREPARAMS = {":ircserv 461 * USER :Not enough parameters\r\n"};
+
 
 /*
  * One log line being built. It collects the arguments given with << and

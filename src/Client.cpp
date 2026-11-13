@@ -6,14 +6,14 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/09 19:37:01 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/12 13:38:31 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/13 19:21:46 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
 Client::Client(int fd)
-	: _fd(fd), _authorized(false)
+	: _fd(fd), _authorized(false), _registered(false), _capNegotiating(false)
 {
 }
 
@@ -31,6 +31,11 @@ const std::string &Client::getNick() const
 	return (_nickname);
 }
 
+const std::string&	Client::getUsername() const
+{
+	return (_username);
+}
+
 const std::string	&Client::getOutputBuffer() const
 {
 	return (_outputBuffer);
@@ -46,9 +51,36 @@ void	Client::setNick(const std::string &nickname)
 	_nickname = nickname;
 }
 
+void	Client::setUsername(const std::string &username)
+{
+	_username = username;
+}
+
+void	Client::setRegistered(bool registered)
+{
+	_registered = registered;
+}
+
+void	Client::setCapNegotiating(bool negotiating)
+{
+	_capNegotiating = negotiating;
+}
+
+
+
 bool	Client::isAuthorized() const
 {
 	return(_authorized);
+}
+
+bool	Client::isRegistered() const
+{
+	return (_registered);
+}
+
+bool Client::isCapNegotiating() const
+{
+	return (_capNegotiating);
 }
 
 void	Client::appendInput(const char *data, size_t len)
