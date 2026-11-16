@@ -29,6 +29,7 @@ CXXFLAGS =	-Wall -Wextra -Werror \
 SRCS =	main.cpp \
 		Server.cpp \
 		Client.cpp \
+		Channel.cpp \
 		Log.cpp
 
 # > ~ .cpp to .o conversion

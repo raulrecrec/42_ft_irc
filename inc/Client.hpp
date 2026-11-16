@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:16 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/13 19:20:35 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/16 07:04:28 by daniema3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ class Client
 		int			_fd;
 		std::string	_nickname;
 		std::string	_username;
+		std::string	_hostname;
 		std::string	_inputBuffer;
 		std::string	_outputBuffer;
 		bool		_authorized;
@@ -48,6 +49,7 @@ class Client
 		const std::string&	getNick() const;
 
 		const std::string&	getUsername() const;
+		const std::string&	getHostname() const;
 
 		const std::string	&getOutputBuffer() const;
 
@@ -59,16 +61,17 @@ class Client
 		std::string			prefix() const;
 
 		/*
-		 * Leaves a line ready to be sent to this client. Nothing is sent
-		 * right away: the server side delivers it when the connection is
-		 * ready. Commands use this for every reply and every message they
-		 * forward.
+		 * Leaves a line ready to be sent to this client, adding the "\r\n"
+		 * that ends it. Nothing is sent right away: the server side delivers
+		 * it when the connection is ready. Commands use this for every reply
+		 * and every message they forward.
 		 */
 		void				queue(const std::string &line);
 
 		void				setAuthorized(bool authorized);
 		void				setNick(const std::string &nickname);
 		void				setUsername(const std::string &username);
+		void				setHostname(const std::string &hostname);
 		void				setRegistered(bool registered);
 		void				setCapNegotiating(bool negotiating);
 

@@ -6,14 +6,14 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/09 19:37:01 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/13 19:21:46 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/16 06:59:01 by daniema3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
 Client::Client(int fd)
-	: _fd(fd), _authorized(false), _registered(false), _capNegotiating(false)
+	: _fd(fd), _hostname("localhost"), _authorized(false), _registered(false), _capNegotiating(false)
 {
 }
 
@@ -36,6 +36,11 @@ const std::string&	Client::getUsername() const
 	return (_username);
 }
 
+const std::string&	Client::getHostname() const
+{
+	return (_hostname);
+}
+
 const std::string	&Client::getOutputBuffer() const
 {
 	return (_outputBuffer);
@@ -54,6 +59,11 @@ void	Client::setNick(const std::string &nickname)
 void	Client::setUsername(const std::string &username)
 {
 	_username = username;
+}
+
+void	Client::setHostname(const std::string &hostname)
+{
+	_hostname = hostname;
 }
 
 void	Client::setRegistered(bool registered)
@@ -110,6 +120,16 @@ LineStatus	Client::extractLine(std::string &line)
 	line = _inputBuffer.substr(0, pos);
 	_inputBuffer.erase(0, pos + 2);
 	return (LINE_READY);
+}
+
+std::string	Client::prefix() const
+{
+	return (_nickname + "!" + _username + "@" + _hostname);
+}
+
+void	Client::queue(const std::string &line)
+{
+	_outputBuffer += line + "\r\n";
 }
 
 void	Client::consumeOutput(size_t bytesSent)
