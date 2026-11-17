@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/13 19:40:29 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/17 15:02:06 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,7 +307,9 @@ void	Server::handleClientRead(int clientFd)
 
 				if (line == "PASS" || line.compare(0, 5, "PASS ") == 0)
 				{
-					if (line.size() <= 5)
+					if (client->isRegistered())
+						sendToClient(clientFd, ":ircserv 462 " + client->getNick() + " " + ERR_ALREADYREGISTRED.text);
+					else if (line.size() <= 5)
 						sendToClient(clientFd, ERR_NEEDMOREPARAMS.text);
 					else if (_password == line.substr(5))
 					{
@@ -348,7 +350,9 @@ void	Server::handleClientRead(int clientFd)
 
 				if (line == "USER" || line.compare(0, 5, "USER ") == 0)
 				{
-					if(line.size() <= 5)
+					if (client->isRegistered())
+						sendToClient(clientFd, ":ircserv 462 " + client->getNick() + " " + ERR_ALREADYREGISTRED.text);
+					else if(line.size() <= 5)
 						sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS.text);
 					else
 					{
@@ -484,6 +488,7 @@ void	Server::tryRegister(Client *client)
 	if (!client->isRegistered() && client->isAuthorized() && !client->getNick().empty() && !client->getUsername().empty() && !client->isCapNegotiating())
 	{
 		client->setRegistered(true);
+		Log::debug(CLIENT_REGISTERED) << client->getFd() << client->getNick();
 		sendToClient(client->getFd(), ":ircserv 001 " + client->getNick() + " " + RPL_WELCOME.text);
 	}
 }

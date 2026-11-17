@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/09 19:37:01 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/16 06:59:01 by daniema3         ###   ########.fr       */
+/*   Updated: 2026/11/17 14:04:41 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,8 +75,6 @@ void	Client::setCapNegotiating(bool negotiating)
 {
 	_capNegotiating = negotiating;
 }
-
-
 
 bool	Client::isAuthorized() const
 {

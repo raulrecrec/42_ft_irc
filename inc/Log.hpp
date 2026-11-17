@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 21:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/13 19:49:15 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/17 14:36:52 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ const LogDebug	DATA_RECEIVED = {"Received <white>{1} <msgcol>bytes from client <
 const LogDebug	COMMAND_RECEIVED = {"Client <white>{0} <msgcol>sent: <white>{1}"};
 const LogDebug	CLIENT_AUTHORIZED = {"Client <white>{0} <msgcol>authorized successfully"};
 const LogDebug	CLIENT_NICK_SET = {"Client <white>{0} <msgcol>set nickname to <white>{1}"};
+const LogDebug	CLIENT_REGISTERED = {"Client <white>{0} <msgcol>(<white>{1}<msgcol>) registered successfully"};
 
 const LogInfo	STARTING = {"Starting IRC server"};
 
@@ -68,6 +69,7 @@ const LogErr	ERR_NONICKNAMEGIVEN = {":ircserv 431 * :No nickname given\r\n"};
 const LogErr	ERR_NICKNAMEINUSE = {":Nickname is already in use\r\n"};
 const LogErr	ERR_ERRONEUSNICKNAME = {":Erroneous nickname\r\n"};
 const LogErr	ERR_USER_NEEDMOREPARAMS = {":ircserv 461 * USER :Not enough parameters\r\n"};
+const LogErr	ERR_ALREADYREGISTRED = {":You may not reregister\r\n"};
 
 
 /*
