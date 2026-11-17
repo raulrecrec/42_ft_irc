@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/17 15:49:45 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/17 19:31:32 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@
 #include "Log.hpp"
 #include "IRCReplies.hpp"
 #include <cctype>
+#include "Parser.hpp"
+#include "Message.hpp"
+#include "Commands.hpp"
 
 Server::Server(int port, const std::string &password)
 	: _listenFd(-1), _port(port), _password(password)
@@ -273,122 +276,14 @@ void	Server::handleClientRead(int clientFd)
 			{
 			case LINE_READY:
 			{
-				if (line == "CAP LS" || line == "CAP LS 302")
-				{
-					client->setCapNegotiating(true);
-					sendToClient(clientFd, ":ircserv CAP * LS :\r\n");
-				}
+				Message	msg = Parser::parseMessage(line);
 
-				if (line == "CAP END")
-				{
-					client->setCapNegotiating(false);
-					tryRegister(client);
-				}
-
-				if (line == "PASS" || line.compare(0, 5, "PASS ") == 0)
+				if (msg.command == "PASS")
 					Log::debug(COMMAND_RECEIVED) << clientFd << "PASS [REDACTED]";
 				else
 					Log::debug(COMMAND_RECEIVED) << clientFd << line;
 
-				if (line.compare(0, 5, "PING ") == 0)
-					sendToClient(clientFd, "PONG" + line.substr(4) + "\r\n");
-
-				if (line.compare(0, 6, "RELAY ") == 0)
-				{
-					std::map<int, Client*>::iterator itMap;
-
-					itMap = _clients.begin();
-					while (itMap != _clients.end())
-					{
-						if (itMap->first != clientFd)
-							sendToClient(itMap->first, ":ircserv NOTICE * :[RELAY] " + line.substr(6) + "\r\n");
-						itMap++;
-					}
-				}
-
-				if (line == "PASS" || line.compare(0, 5, "PASS ") == 0)
-				{
-					if (client->isRegistered())
-						sendToClient(clientFd, ":ircserv 462 " + client->getNick() + " " + ERR_ALREADYREGISTRED);
-					else if (line.size() <= 5)
-						sendToClient(clientFd, ERR_NEEDMOREPARAMS);
-					else if (_password == line.substr(5))
-					{
-						client->setAuthorized(true);
-						Log::debug(CLIENT_AUTHORIZED) << clientFd;
-						tryRegister(client);
-					}
-					else
-						sendToClient(clientFd, ERR_PASSWDMISMATCH);
-				}
-
-				if (line == "NICK" || line.compare(0, 5, "NICK ") == 0)
-				{
-					if (line.size() <= 5)
-						sendToClient(clientFd, ERR_NONICKNAMEGIVEN);
-					else
-					{
-						std::string	nickname;
-						Client		*existingClient;
-
-						nickname = line.substr(5);
-						if (!isValidNick(nickname))
-							sendToClient(clientFd, ":ircserv 432 * " + nickname + " " + ERR_ERRONEUSNICKNAME);
-						else
-						{
-							existingClient = findClient(nickname);
-							if (existingClient == NULL || existingClient == client)
-							{
-								client->setNick(nickname);
-								Log::debug(CLIENT_NICK_SET) << clientFd << nickname;
-								tryRegister(client);
-							}
-							else
-								sendToClient(clientFd, ":ircserv 433 * " + nickname + " " + ERR_NICKNAMEINUSE);
-						}
-					}
-				}
-
-				if (line == "USER" || line.compare(0, 5, "USER ") == 0)
-				{
-					if (client->isRegistered())
-						sendToClient(clientFd, ":ircserv 462 " + client->getNick() + " " + ERR_ALREADYREGISTRED);
-					else if(line.size() <= 5)
-						sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS);
-					else
-					{
-						std::istringstream	stream(line.substr(5));
-						std::string			userName;
-						std::string			hostname;
-						std::string			servername;
-						std::string			realname;
-
-						stream >> userName;
-						stream >> hostname;
-						stream >> servername;
-						std::getline(stream, realname);
-
-						size_t	start;
-
-						start = realname.find_first_not_of(" \t");
-						if (start != std::string::npos)
-							realname.erase(0, start);
-						else
-							realname.clear();
-
-						if (!realname.empty() && realname[0] == ':')
-							realname.erase(0, 1);
-
-						if (userName.empty() || hostname.empty() || servername.empty() || realname.find_first_not_of(" \t") == std::string::npos)
-							sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS);
-						else
-						{
-							client->setUsername(userName);
-							tryRegister(client);
-						}
-					}
-				}
-
+				Commands::execute(*this, *client, msg);
 				break ;
 			}
 			case LINE_INCOMPLETE:
@@ -492,6 +387,11 @@ void	Server::tryRegister(Client *client)
 		Log::debug(CLIENT_REGISTERED) << client->getFd() << client->getNick();
 		sendToClient(client->getFd(), ":ircserv 001 " + client->getNick() + " " + RPL_WELCOME);
 	}
+}
+
+bool	Server::checkPassword(const std::string &password) const
+{
+	return (password == _password);
 }
 
 Client	*Server::findClient(const std::string &nick)

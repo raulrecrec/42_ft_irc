@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 20:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/13 18:48:59 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/17 19:50:09 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,7 @@ class Server
 		void		removeClient(int clientFd);
 		void		handleClientRead(int clientFd);
 		void		handleClientWrite(struct pollfd &pfd);
-		bool		isValidNick(const std::string &nickname);
 		std::string	normalizeNick(const std::string &nickname) const;
-		void		tryRegister(Client *client);
 		/*
 		 * Every existing channel, by name. Lives in the server so commands
 		 * can reach it, but only the channel side creates, changes and
@@ -59,7 +57,9 @@ class Server
 		~Server();
 
 		void	run();
-		
+		void	tryRegister(Client *client);
+		bool	checkPassword(const std::string &password) const;
+		bool	isValidNick(const std::string &nickname);
 
 		/*
 		 * Finds the connected client using that nickname, ignoring case
