@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/17 15:02:06 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/17 15:49:45 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <cerrno>
 #include "Client.hpp"
 #include "Log.hpp"
+#include "IRCReplies.hpp"
 #include <cctype>
 
 Server::Server(int port, const std::string &password)
@@ -308,9 +309,9 @@ void	Server::handleClientRead(int clientFd)
 				if (line == "PASS" || line.compare(0, 5, "PASS ") == 0)
 				{
 					if (client->isRegistered())
-						sendToClient(clientFd, ":ircserv 462 " + client->getNick() + " " + ERR_ALREADYREGISTRED.text);
+						sendToClient(clientFd, ":ircserv 462 " + client->getNick() + " " + ERR_ALREADYREGISTRED);
 					else if (line.size() <= 5)
-						sendToClient(clientFd, ERR_NEEDMOREPARAMS.text);
+						sendToClient(clientFd, ERR_NEEDMOREPARAMS);
 					else if (_password == line.substr(5))
 					{
 						client->setAuthorized(true);
@@ -318,13 +319,13 @@ void	Server::handleClientRead(int clientFd)
 						tryRegister(client);
 					}
 					else
-						sendToClient(clientFd, ERR_PASSWDMISMATCH.text);
+						sendToClient(clientFd, ERR_PASSWDMISMATCH);
 				}
 
 				if (line == "NICK" || line.compare(0, 5, "NICK ") == 0)
 				{
 					if (line.size() <= 5)
-						sendToClient(clientFd, ERR_NONICKNAMEGIVEN.text);
+						sendToClient(clientFd, ERR_NONICKNAMEGIVEN);
 					else
 					{
 						std::string	nickname;
@@ -332,7 +333,7 @@ void	Server::handleClientRead(int clientFd)
 
 						nickname = line.substr(5);
 						if (!isValidNick(nickname))
-							sendToClient(clientFd, ":ircserv 432 * " + nickname + " " + ERR_ERRONEUSNICKNAME.text);
+							sendToClient(clientFd, ":ircserv 432 * " + nickname + " " + ERR_ERRONEUSNICKNAME);
 						else
 						{
 							existingClient = findClient(nickname);
@@ -343,7 +344,7 @@ void	Server::handleClientRead(int clientFd)
 								tryRegister(client);
 							}
 							else
-								sendToClient(clientFd, ":ircserv 433 * " + nickname + " " + ERR_NICKNAMEINUSE.text);
+								sendToClient(clientFd, ":ircserv 433 * " + nickname + " " + ERR_NICKNAMEINUSE);
 						}
 					}
 				}
@@ -351,9 +352,9 @@ void	Server::handleClientRead(int clientFd)
 				if (line == "USER" || line.compare(0, 5, "USER ") == 0)
 				{
 					if (client->isRegistered())
-						sendToClient(clientFd, ":ircserv 462 " + client->getNick() + " " + ERR_ALREADYREGISTRED.text);
+						sendToClient(clientFd, ":ircserv 462 " + client->getNick() + " " + ERR_ALREADYREGISTRED);
 					else if(line.size() <= 5)
-						sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS.text);
+						sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS);
 					else
 					{
 						std::istringstream	stream(line.substr(5));
@@ -379,7 +380,7 @@ void	Server::handleClientRead(int clientFd)
 							realname.erase(0, 1);
 
 						if (userName.empty() || hostname.empty() || servername.empty() || realname.find_first_not_of(" \t") == std::string::npos)
-							sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS.text);
+							sendToClient(clientFd, ERR_USER_NEEDMOREPARAMS);
 						else
 						{
 							client->setUsername(userName);
@@ -489,7 +490,7 @@ void	Server::tryRegister(Client *client)
 	{
 		client->setRegistered(true);
 		Log::debug(CLIENT_REGISTERED) << client->getFd() << client->getNick();
-		sendToClient(client->getFd(), ":ircserv 001 " + client->getNick() + " " + RPL_WELCOME.text);
+		sendToClient(client->getFd(), ":ircserv 001 " + client->getNick() + " " + RPL_WELCOME);
 	}
 }
 
