@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/17 17:28:27 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/17 19:33:12 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/18 15:04:51 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,25 @@ void	Commands::execute(Server &server, Client &client, const Message &msg)
 		nick(server, client, msg);
 	else if (msg.command == "USER")
 		user(server, client, msg);
+	else if (!msg.command.empty())
+	{
+		std::string	nickname;
+
+		nickname = client.getNick();
+		if (nickname.empty())
+			nickname = "*";
+		
+		server.sendToClient(client.getFd(), ":ircserv 421 " + nickname + " " + msg.command + " " + ERR_UNKNOWNCOMMAND);
+	}
 }
 
 void	Commands::ping(Server &server, Client &client, const Message &msg)
 {
 	if (msg.params.empty())
+	{
+		server.sendToClient(client.getFd(), ERR_NOORIGIN);
 		return ;
+	}
 
 	server.sendToClient(client.getFd(), "PONG :" + msg.params[0] + "\r\n");
 }
