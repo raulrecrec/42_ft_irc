@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/05 21:17:28 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/17 15:48:28 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/18 14:53:22 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ const LogErr	SERVER_STOPPED = {"Server stopped: <white>{0}"};
 const LogErr	SERVER_SOCKET_CREATE_FAILED = {"Failed to create server socket"};
 const LogErr	SERVER_SOCKET_NONBLOCK_FAILED = {"Failed to set server socket to non-blocking mode"};
 const LogErr	SERVER_SOCKET_BIND_FAILED = {"Failed to bind server socket"};
+const LogErr	SERVER_SOCKET_REUSEADDR_FAILED = {"Failed to set SO_REUSEADDR socket option"};
 const LogErr	SERVER_SOCKET_LISTEN_FAILED = {"Failed to listen on server socket"};
 const LogErr	SERVER_POLL_FAILED = {"Failed to poll server sockets"};
 const LogErr	LISTEN_SOCKET_POLL_ERROR = {"Listening socket error detected by poll"};

@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/17 19:31:32 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/18 14:55:16 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,17 @@ void	Server::initSocket()
 	{
 		closeSocket();
 		throw std::runtime_error(SERVER_SOCKET_NONBLOCK_FAILED.text);
+	}
+
+	int	option;
+
+	option = 1;
+	result = setsockopt(_listenFd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+
+	if (result == -1)
+	{
+		closeSocket();
+		throw std::runtime_error(SERVER_SOCKET_REUSEADDR_FAILED.text);
 	}
 
 	result = bind(_listenFd, reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr));
