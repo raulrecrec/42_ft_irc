@@ -6,7 +6,7 @@
 /*   By: rexposit <rexposit@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/06 15:25:04 by rexposit          #+#    #+#             */
-/*   Updated: 2026/11/18 14:55:16 by rexposit         ###   ########.fr       */
+/*   Updated: 2026/11/18 15:48:08 by rexposit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ void	Server::acceptClient()
 
 	if (clientFd == -1)
 	{
-		if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+		if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR || errno == ECONNABORTED)
 			return ;
 
 		throw std::runtime_error(CLIENT_ACCEPT_FAILED.text);
