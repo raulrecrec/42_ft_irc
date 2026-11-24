@@ -7,8 +7,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [g++, clang++]
+    name: Build (${{ matrix.compiler }})
     steps:
       - uses: actions/checkout@v4
 
       - name: Build
-        run: make
+        run: make CXX=${{ matrix.compiler }}
