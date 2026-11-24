@@ -15,7 +15,7 @@
 
 #include <string>
 
-class Message;
+struct Message;
 
 class Parser
 {
